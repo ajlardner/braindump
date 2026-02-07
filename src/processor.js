@@ -5,12 +5,14 @@
 
 // Patterns for extraction
 const patterns = {
-  // Action items: "need to", "should", "have to", "must", "todo:", "- [ ]"
+  // Action items: "need to", "have to", "must", "todo:", "- [ ]"
+  // Captures up to sentence boundary
   actions: [
-    /(?:need to|have to|should|must|gotta|gonna)\s+(.+?)(?:\.|$|,)/gi,
-    /(?:todo|task|action):\s*(.+?)(?:\.|$|\n)/gi,
-    /[-•]\s*\[\s*\]\s*(.+?)(?:\n|$)/gi,
-    /(?:remind me to|don't forget to)\s+(.+?)(?:\.|$)/gi,
+    /\b(?:need to|have to|gotta|gonna)\s+([^.!?]+)/gi,
+    /\b(?:todo|task|action):\s*([^.!?\n]+)/gi,
+    /[-•]\s*\[\s*\]\s*([^\n]+)/gi,
+    /\b(?:remind me to|don't forget to)\s+([^.!?]+)/gi,
+    /\b(?:also\s+)?(?:talk to|call|text|message)\s+(\w+\s+about\s+[^.!?,]+|\w+)/gi,
   ],
   
   // People: "@name" or "talk to X", "email X", "call X"
