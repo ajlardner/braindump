@@ -31,7 +31,9 @@ const patterns = {
   // Questions/decisions needed
   questions: [
     /(?:should (?:I|we)|do (?:I|we) need to|what if|how (?:do|should) (?:I|we))\s+(.+?\?)/gi,
-    /\?\s*$/gm,
+    /(.+?\?)\s*$/gm,
+    /(?:should we use|should I use)\s+(.+?)\?/gi,
+    /(\w+)\s+or\s+(\w+)\?/gi,  // "X or Y?" pattern
   ],
   
   // Ideas (often start with "what if", "maybe", "could")
@@ -40,6 +42,13 @@ const patterns = {
     /(?:might be cool to|would be nice to)\s+(.+?)(?:\.|$)/gi,
   ],
   
+  // Decisions (choices between options)
+  decisions: [
+    /(?:should we use|should I use|use)\s+(\w+)\s+or\s+(\w+)/gi,
+    /(?:between|choose|pick)\s+(\w+)\s+(?:and|or)\s+(\w+)/gi,
+    /(\w+)\s+vs\.?\s+(\w+)/gi,
+  ],
+
   // Blockers/problems
   blockers: [
     /(?:blocked on|waiting for|need .+ before|can't .+ until)\s+(.+?)(?:\.|$)/gi,
@@ -81,6 +90,7 @@ export function processDump(text) {
     dates: extractMatches(text, patterns.dates),
     questions: extractMatches(text, patterns.questions),
     ideas: extractMatches(text, patterns.ideas),
+    decisions: extractMatches(text, patterns.decisions),
     blockers: extractMatches(text, patterns.blockers),
     
     // Summary stats
@@ -149,6 +159,14 @@ export function formatAsMarkdown(result) {
     lines.push('');
   }
   
+  if (result.decisions.length > 0) {
+    lines.push('## Decisions Needed');
+    for (const decision of result.decisions) {
+      lines.push(`- 🤔 ${decision}`);
+    }
+    lines.push('');
+  }
+
   if (result.blockers.length > 0) {
     lines.push('## Blockers');
     for (const blocker of result.blockers) {
@@ -179,6 +197,9 @@ export function summarize(result) {
   }
   if (result.dates.length) {
     parts.push(`${result.dates.length} date(s)`);
+  }
+  if (result.decisions.length) {
+    parts.push(`${result.decisions.length} decision(s)`);
   }
   if (result.blockers.length) {
     parts.push(`${result.blockers.length} blocker(s)`);

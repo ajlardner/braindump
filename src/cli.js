@@ -73,6 +73,14 @@ program
     if (result.dates.length) {
       console.log('Dates:', result.dates.join(', '));
     }
+    
+    if (result.decisions.length) {
+      console.log('Decisions needed:', result.decisions.join(', '));
+    }
+    
+    if (result.questions.length) {
+      console.log('Questions:', result.questions.join(', '));
+    }
   });
 
 program.parse();
