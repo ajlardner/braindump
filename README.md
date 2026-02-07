@@ -55,6 +55,26 @@ cat notes.txt | braindump process
 braindump process -f notes.txt --json
 ```
 
+### LLM Enhancement (experimental)
+
+Add `--llm` for smarter extraction using AI. Catches implicit actions and adds priority.
+
+```bash
+# Using OpenAI (default)
+export OPENAI_API_KEY=sk-...
+braindump quick "john never got back to me about that report" --llm
+
+# Using Anthropic
+export ANTHROPIC_API_KEY=sk-ant-...
+braindump quick "john never got back to me" --llm --provider anthropic
+```
+
+LLM enhancement finds implicit actions like "follow up with John" from context.
+
+Supported providers:
+- `openai` (default) - gpt-4o-mini
+- `anthropic` - claude-3-haiku
+
 ## API
 
 ```javascript
@@ -67,8 +87,12 @@ const dump = `
   blocked on waiting for API access
 `;
 
-const result = processDump(dump);
+const result = await processDump(dump);
 console.log(result.actions);  // ['finish the report by tomorrow', 'talk to mike about the budget']
+
+// With LLM enhancement
+const enhanced = await processDump(dump, { llm: true });
+console.log(enhanced.stats.llm_enhanced);  // true
 console.log(result.people);   // ['mike']
 console.log(result.dates);    // ['tomorrow']
 console.log(result.blockers); // ['waiting for API access']
@@ -90,11 +114,12 @@ console.log(formatAsMarkdown(result));
 
 ## Roadmap
 
-- [ ] LLM enhancement for context-aware extraction
+- [x] LLM enhancement for context-aware extraction
 - [ ] Voice input (transcription → processing)
 - [ ] Calendar integration
 - [ ] Todo app integrations (Todoist, Things, etc.)
 - [ ] Learn personal patterns over time
+- [ ] Local LLM support (Ollama)
 
 ## License
 

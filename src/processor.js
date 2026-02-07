@@ -78,10 +78,18 @@ function extractMatches(text, patternList) {
   return Array.from(matches);
 }
 
+import { enhance, mergeResults } from './llm-enhancer.js';
+
 /**
  * Process a brain dump and extract structured data
+ * @param {string} text - Raw brain dump text
+ * @param {object} options - Processing options
+ * @param {boolean} options.llm - Enable LLM enhancement (default: false)
+ * @param {string} options.provider - LLM provider: 'openai' or 'anthropic' (default: 'openai')
+ * @param {string} options.model - Model to use (provider-specific defaults)
+ * @param {string} options.apiKey - API key (defaults to env var)
  */
-export function processDump(text) {
+export async function processDump(text, options = {}) {
   const result = {
     raw: text,
     processed_at: new Date().toISOString(),
@@ -106,7 +114,24 @@ export function processDump(text) {
     people_mentioned: result.people.length,
     has_deadlines: result.dates.length > 0,
     has_blockers: result.blockers.length > 0,
+    llm_enhanced: false,
   };
+  
+  // If LLM enhancement requested, merge results
+  if (options.llm) {
+    try {
+      const llmResult = await enhance(text, {
+        provider: options.provider,
+        model: options.model,
+        apiKey: options.apiKey,
+      });
+      return mergeResults(result, llmResult);
+    } catch (error) {
+      // Log error but return regex-only results
+      console.error(`LLM enhancement failed: ${error.message}`);
+      result.stats.llm_error = error.message;
+    }
+  }
   
   return result;
 }

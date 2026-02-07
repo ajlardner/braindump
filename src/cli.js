@@ -15,6 +15,9 @@ program
   .option('-f, --file <path>', 'Read from file instead of stdin')
   .option('-o, --output <path>', 'Write output to file')
   .option('--json', 'Output as JSON instead of markdown')
+  .option('--llm', 'Enable LLM enhancement for better extraction')
+  .option('--provider <provider>', 'LLM provider: openai or anthropic', 'openai')
+  .option('--model <model>', 'Model to use (provider-specific defaults)')
   .action(async (options) => {
     let text;
     
@@ -38,7 +41,11 @@ program
       process.exit(1);
     }
     
-    const result = processDump(text);
+    const result = await processDump(text, {
+      llm: options.llm,
+      provider: options.provider,
+      model: options.model,
+    });
     const output = options.json 
       ? JSON.stringify(result, null, 2)
       : formatAsMarkdown(result);
@@ -55,9 +62,16 @@ program
 program
   .command('quick <text...>')
   .description('Quickly process text from command line')
-  .action((textParts) => {
+  .option('--llm', 'Enable LLM enhancement')
+  .option('--provider <provider>', 'LLM provider: openai or anthropic', 'openai')
+  .option('--model <model>', 'Model to use')
+  .action(async (textParts, options) => {
     const text = textParts.join(' ');
-    const result = processDump(text);
+    const result = await processDump(text, {
+      llm: options.llm,
+      provider: options.provider,
+      model: options.model,
+    });
     
     console.log('\\n' + summarize(result) + '\\n');
     
